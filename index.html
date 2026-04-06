@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<title>Generator</title>
+
+<style>
+body {
+  font-family: "Segoe UI", sans-serif;
+  background: linear-gradient(90deg,#4a1c58,#7c346c,#934c7f,#5e2962);
+  color: #eee;
+  display: flex;
+  justify-content: center;
+  padding: 40px;
+  height: 100%;
+  margin: 0;
+  background-size: 300% 300%;
+  animation: gradientMove 20s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.container {
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+h1 {
+  margin-bottom: 10px;
+  font-weight: 600;
+  letter-spacing: 1px;
+  color: #f1d4ff;
+}
+
+select {
+  padding: 8px 12px;
+  border-radius: 8px;
+  border: none;
+  background: rgba(40, 15, 60, 0.8);
+  color: #f4eaf7;
+  margin-bottom: 20px;
+}
+
+.result {
+  background: rgba(25, 10, 35, 0.55);
+  padding: 20px;
+  border-radius: 16px;
+  backdrop-filter: blur(10px);
+  box-shadow: 0 0 20px rgba(0,0,0,0.3);
+  text-align: left;
+  min-height: 120px;
+}
+
+.result p {
+  margin: 8px 0;
+}
+
+b {
+  color: #eee;
+}
+
+
+button {
+	margin-top: 20px;
+  padding: 12px 20px;
+  font-size: 15px;
+  font-weight: bolder;
+  border: none;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #ffffff, #f3e8ff);
+  color: #280F3C; 
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow:
+    0 4px 12px rgba(0,0,0,0.25),
+    inset 0 0 6px rgba(255,255,255,0.6);
+}
+
+
+button:hover {
+  transform: translateY(-2px);
+  background: linear-gradient(135deg, #ffffff, #e9d5ff);
+  box-shadow:
+    0 6px 18px rgba(0,0,0,0.3),
+    0 0 12px rgba(216, 156, 255, 0.6);
+}
+
+
+button:active {
+  transform: scale(0.97);
+  background: linear-gradient(135deg, #e9d5ff, #ffffff);
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+
+<h1 id="title">Генератор сюжета</h1>
+
+<select id="lang" onchange="updateLanguage()">
+  <option value="ru">Русский</option>
+  <option value="en">English</option>
+</select>
+
+<div class="result" id="output"></div>
+
+<button id="generateBtn" onclick="generate()">Сгенерировать</button>
+
+</div>
+
+<script>
+const data = {
+  ru: {
+    title: "Генератор сюжета",
+    button: "Сгенерировать",
+
+    role: ["телохраниетель",
+"враг",
+"друг",
+"друг детства",
+"учитель",
+"босс",
+"наставник",
+"коллега",
+"сосед",
+"однокурсник",
+"студент",
+"клиент/заказчик",
+"подчинённый",
+"бывший начальник",
+"новый руководитель",
+"конкурент",
+"бывший партнёр",
+"тайный возлюбленный",
+"фиктивный партнёр",
+"жених/невеста по договорённости",
+"супруг",
+"человек из дейтинг-приложения",
+"сталкер",
+"поклонник",
+"манипулятор",
+"преследователь/маньяк",
+"спаситель",
+"шантажист",
+"маргинал/преступник",
+"жертва",
+"напарник по делу",
+"охотник за головами/член мафии",
+"демон/ангел",
+"вампир",
+"дух/призрак",
+"бог/полубог",
+"блогер/стример",
+"соперник",
+"фембой",
+"друг родственника юзер",
+"аутсайдер/неудачник",
+"панк/эмо/рокер",
+"получеловек",
+"архетип золотистого ретривера",
+"архетип черного кота",
+"архетип добермана",
+"случайный партнер на одну ночь",
+"студент по обмену",
+"сосед по комнате",
+"сын маминой подруги",
+"нерд",
+"девственник",
+"бабник/плейбой"
+],
+    motive: [
+      "нуждается в юзере",
+"боится потерять юзера",
+"хочет быть рядом",
+"чувствует себя «на месте» только с юзером",
+"хочет, чтобы юзер выбрал его",
+"хочет контролировать юзера",
+"не может позволить юзеру уйти",
+"хочет подчинить юзера",
+"хочет, чтобы юзер зависел от него",
+"проверяет границы юзера",
+"хочет доминировать в отношениях",
+"хочет близости, но боится её",
+"ненавидит свою зависимость от юзера",
+"не доверяет юзеру, но остаётся",
+"хочет уйти, но не может",
+"борется с чувствами к юзеру",
+"чувствует ответственность за юзера",
+"обязан защищать юзера",
+"должен использовать юзера",
+"должен держаться подальше",
+"связан обещанием",
+"выполняет приказ, связанный с юзером",
+"использует юзера в своих целях",
+"манипулирует юзером",
+"хочет сломать юзера",
+"ревнует юзера ко всем",
+"хочет сделать юзера счастливым",
+"хочет спасти юзера",
+"юзер мешает его цели",
+"их связь — проблема",
+"не понимает, почему тянется к юзеру",
+"боится, что разрушит юзера",
+"видит в юзере что-то важное",
+"считает юзера своей судьбой",
+"хочет переспать с юзер",
+"хочет построить семью с юзер"
+    ],
+    twist: [
+      "есть супруг",
+"он не тот, за кого себя выдает",
+"он связан с прошлым юзера",
+"юзер в опасности",
+"вы из разных миров (статус, раса, роль)",
+"это нарушает правила",
+"скрывает правду",
+"он притворяется хуже/лучше, чем есть",
+"он виновен в чем-то, что произошло с юзером",
+"их встреча не случайна",
+"он должен выбрать между юзером и чем-то важным",
+"юзер — препятствие его цели",
+"они по разные стороны конфликта",
+"их цели несовместимы/соперничество",
+"он использует юзера",
+"юзер использует его",
+"он источник опасности",
+"опасность это он сам",
+"юзер опасен для него",
+"спасая юзера, он разрушает что-то ещё",
+"он играет роль, но заигрывается",
+"он затаил обиду на юзер",
+"он планирует отомстить юзер",
+"он пропал, а потом вернулся",
+"измена",
+"он опозорил/подставил юзера",
+"есть компромат на юзера",
+"между вами уже что-то было"
+    ],
+    dynamic: [
+      "slow burn",
+"токсичная зависимость",
+"игра власти",
+"“хочу, но нельзя”",
+"манипуляция",
+"флафф",
+"ангст",
+"он не может без юзер",
+"юзер его слабость",
+"он ненавидит зависимость от юзер",
+"вынужденное сотрудничество",
+"enemies to lovers",
+"friends to lovers",
+"strangers to lovers",
+"forbidden love (запретные отношения)",
+"fake relationship (притворяются парой)",
+"second chance (бывшие)",
+"mutual pining (оба хотят, но молчат)",
+"one-sided love (односторонняя любовь)",
+"дисбаланс власти",
+"контроль ↔ сопротивление",
+"доминирование/подчинение",
+"борьба за контроль",
+"скрытый контроль (он ведёт, но незаметно)",
+"эмоциональные качели",
+"зависимость ↔ отторжение",
+"«кто сломается первым»",
+"hurt/comfort",
+"«мы не можем быть вместе»",
+"медленное разрушение отношений",
+"попытка спасти то, что уже сломано",
+"один тянется, другой отталкивает",
+"он причиняет боль, но остаётся",
+"«я тебе не нужен, но ты не уйдёшь»",
+"ревность",
+"собственничество",
+"газлайтинг",
+"эмоциональная зависимость с обеих сторон",
+"«если не я — то никто»",
+"один закрыт, другой пытается пробиться",
+"эмоциональная недоступность",
+"«я не умею чувствовать»",
+"trapped together (заперты вместе)",
+"вынужденная защита",
+"тайные отношения"
+    ],
+
+    labels: {
+      role: "Роль",
+      motive: "Мотив",
+      twist: "Твист",
+      dynamic: "Динамика"
+    }
+  },
+
+  en: {
+    title: "Story Generator",
+    button: "Generate",
+
+    role: [
+	"bodyguard",
+"enemy",
+"friend",
+"childhood friend",
+"teacher",
+"boss",
+"mentor",
+"colleague",
+"neighbor",
+"classmate",
+"student",
+"client/customer",
+"subordinate",
+"former boss",
+"new boss",
+"competitor",
+"ex-partner",
+"secret lover",
+"fake partner",
+"arranged fiancé/fiancée",
+"spouse",
+"dating app match",
+"stalker",
+"admirer",
+"manipulator",
+"pursuer/maniac",
+"savior",
+"blackmailer",
+"outcast/criminal",
+"victim",
+"case partner",
+"bounty hunter/mafia member",
+"demon/angel",
+"vampire",
+"spirit/ghost",
+"god/demigod",
+"blogger/streamer",
+"rival",
+"femboy",
+"user's relative's friend",
+"outsider/loser",
+"punk/emo/rocker",
+"demihuman",
+"golden retriever archetype",
+"black cat archetype",
+"doberman archetype",
+"one-night stand",
+"exchange student",
+"roommate",
+"mom's friend's son",
+"nerd",
+"virgin",
+"womanizer/playboy"
+],
+    motive: [
+      "needs the user",
+"is afraid of losing the user",
+"wants to be close",
+"feels 'in the right place' only with the user",
+"wants the user to choose them",
+"wants to control the user",
+"cannot let the user go",
+"wants to subjugate the user",
+"wants the user to depend on them",
+"tests the user's boundaries",
+"wants to dominate the relationship",
+"wants intimacy but is afraid of it",
+"hates their dependence on the user",
+"doesn't trust the user but stays",
+"wants to leave but cannot",
+"struggles with feelings for the user",
+"feels responsible for the user",
+"is obligated to protect the user",
+"must use the user",
+"must stay away",
+"is bound by a promise",
+"is following an order related to the user",
+"uses the user for their own purposes",
+"manipulates the user",
+"wants to break the user",
+"is jealous of everyone around the user",
+"wants to make the user happy",
+"wants to save the user",
+"the user interferes with their goal",
+"their connection is a problem",
+"doesn't understand why they are drawn to the user",
+"is afraid of destroying the user",
+"sees something important in the user",
+"considers the user their destiny",
+"wants to sleep with the user",
+"wants to build a family with the user"
+    ],
+    twist: [
+      "has a spouse",
+"he is not who he claims to be",
+"he is connected to the user's past",
+"the user is in danger",
+"you are from different worlds (status, race, role)",
+"this breaks the rules",
+"hiding the truth",
+"he pretends to be worse/better than he is",
+"he is guilty of something that happened to the user",
+"their meeting is not a coincidence",
+"he must choose between the user and something important",
+"the user is an obstacle to his goal",
+"they are on opposite sides of a conflict",
+"their goals are incompatible/rivalry",
+"he is using the user",
+"the user is using him",
+"he is the source of danger",
+"the danger is he himself",
+"the user is dangerous to him",
+"by saving the user, he is destroying something else",
+"he is playing a role but getting carried away",
+"he holds a grudge against the user",
+"he is planning to take revenge on the user",
+"he disappeared and then returned",
+"betrayal/infidelity",
+"he shamed/framed the user",
+"he has incriminating evidence on the user",
+"something has already happened between you"
+    ],
+    dynamic: [
+      "slow burn",
+"toxic dependency",
+"power play",
+"“I want it, but I shouldn't”",
+"manipulation",
+"fluff",
+"angst",
+"he can't be without the user",
+"the user is his weakness",
+"he hates his dependency on the user",
+"forced cooperation",
+"enemies to lovers",
+"friends to lovers",
+"strangers to lovers",
+"forbidden love (forbidden relationship)",
+"fake relationship (pretending to be a couple)",
+"second chance (exes)",
+"mutual pining (both want it, but stay silent)",
+"one-sided love (unrequited love)",
+"power imbalance",
+"control ↔ resistance",
+"dominance/submission",
+"struggle for control",
+"hidden control (he leads, but subtly)",
+"emotional rollercoaster",
+"dependency ↔ rejection",
+"«who breaks first»",
+"hurt/comfort",
+"«we can't be together»",
+"slow destruction of the relationship",
+"attempting to save what is already broken",
+"one reaches out, the other pushes away",
+"he causes pain, but stays",
+"«you don't need me, but you won't leave»",
+"jealousy",
+"possessiveness",
+"gaslighting",
+"emotional dependency on both sides",
+"«if not me, then no one»",
+"one is closed off, the other tries to break through",
+"emotional unavailability",
+"«I don't know how to feel»",
+"trapped together (locked together)",
+"forced protection",
+"secret relationship"
+    ],
+
+    labels: {
+      role: "Role",
+      motive: "Motive",
+      twist: "Twist",
+      dynamic: "Dynamic"
+    }
+  }
+};
+
+function rand(arr) {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function generate() {
+  const lang = document.getElementById("lang").value;
+  const d = data[lang];
+
+  document.getElementById("output").innerHTML = `
+    <p><b>${d.labels.role}:</b> ${rand(d.role)}</p>
+    <p><b>${d.labels.motive}:</b> ${rand(d.motive)}</p>
+    <p><b>${d.labels.twist}:</b> ${rand(d.twist)}</p>
+    <p><b>${d.labels.dynamic}:</b> ${rand(d.dynamic)}</p>
+  `;
+}
+
+function updateLanguage() {
+  const lang = document.getElementById("lang").value;
+  const d = data[lang];
+
+  document.getElementById("title").innerText = d.title;
+  document.getElementById("generateBtn").innerText = d.button;
+}
+</script>
+
+</body>
+</html>
